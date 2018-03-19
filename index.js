@@ -62,10 +62,8 @@ if (require.main === module) {
                   process.exit(1);
                 });
               } else {
-                res.pipe(process.stderr);
-                res.on('end', () => {
-                  process.exit(1);
-                });
+                console.warn('connection error');
+                process.exit(1);
               }
             });
             req.on('error', err => {
