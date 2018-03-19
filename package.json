@@ -18,6 +18,7 @@
   "homepage": "https://github.com/modulesio/webmr#readme",
   "dependencies": {
     "minimist": "^1.2.0",
+    "progress": "^2.0.0",
     "tar-fs": "^1.16.0"
   }
 }
