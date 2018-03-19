@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/modulesio/webmr/issues"
   },
-  "homepage": "https://github.com/modulesio/webmr#readme"
+  "homepage": "https://github.com/modulesio/webmr#readme",
+  "dependencies": {
+    "minimist": "^1.2.0",
+    "tar-fs": "^1.16.0"
+  }
 }
