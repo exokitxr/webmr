@@ -47,8 +47,8 @@ if (require.main === module) {
       {
         name: 'email',
         message: 'Email',
-        warning: 'Invalid email',
-        validator: /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+        // warning: 'Invalid email',
+        // validator: /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
         empty: false,
       },
       {
