@@ -60,17 +60,46 @@ if (require.main === module) {
     ], (err, result) => {
       if (result) {
         const {email, password} = result;
-        fs.writeFile(configFilePath, JSON.stringify({
-          email,
-          password,
-        }), err => {
-          if (!err) {
-            console.log('Logged in as', email);
-          } else {
-            console.warn(err.stack);
+        const req = (REGISTRY_SECURE ? https : http).request({
+          method: 'POST',
+          hostname: REGISTRY_HOSTNAME,
+          port: REGISTRY_PORT,
+          path: '/l',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }, res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            fs.writeFile(configFilePath, JSON.stringify({
+              email,
+              password,
+            }), err => {
+              if (!err) {
+                console.log('Logged in as', email);
+              } else {
+                console.warn(err.stack);
+                process.exit(1);
+              }
+            });
+          } else if (res.statusCode === 403) {
+            console.warn(`Invalid password for ${email}`);
             process.exit(1);
+          } else {
+            console.warn(`invalid status code: ${res.statusCode}`);
+            res.pipe(process.stderr);
+            res.on('end', () => {
+              process.exit(1);
+            });
           }
         });
+        req.on('error', err => {
+          console.warn(err.stack);
+          process.exit(1);
+        });
+        req.end(JSON.stringify({
+          email,
+          password,
+        }));
       } else {
         console.log();
       }
