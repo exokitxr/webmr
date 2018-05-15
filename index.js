@@ -13,7 +13,7 @@ const parseJsonResponse = require('parse-json-response');
 
 const REGISTRY_HOSTNAME = 'registry.webmr.io';
 const REGISTRY_PORT = null;
-const REGISTRY_SECURE = false;
+const REGISTRY_SECURE = true;
 const FILES_HOSTNAME = 'files.webmr.io';
 
 if (require.main === module) {
