@@ -31,7 +31,7 @@ if (require.main === module) {
       if (!err) {
         const s = d.toString('utf8');
         const j = JSON.parse(s);
-        const {name} = j;
+        const {name, version = '0.0.1'} = j;
 
         if (name) {
           const bs = [];
@@ -43,7 +43,7 @@ if (require.main === module) {
             const req = https.request({
               method: 'PUT',
               hostname: 'registry.webmr.io',
-              path: `/projects/${name}`
+              path: `/projects`
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 const bs = [];
@@ -55,7 +55,7 @@ if (require.main === module) {
                   const s = b.toString('utf8');
                   const j = JSON.parse(s);
                   const {username, module, version} = j;
-                  console.log(`+ ${username}/${module}@${version} https://${module}.${username}.webmr.io/`);
+                  console.log(`+ ${module}@${version} https://files.webmr.io/${module}/${version}/`);
                 });
                 res.on('error', err => {
                   console.warn(err.stack);
@@ -76,7 +76,7 @@ if (require.main === module) {
               size += bs[i].length;
             }
 
-            const bar = new progress(`[:bar] ${username}/${name} :rate bps :percent :etas`, {
+            const bar = new progress(`[:bar] ${name}/${version} :rate bps :percent :etas`, {
               complete: '█',
               incomplete: '.',
               width: 20,
