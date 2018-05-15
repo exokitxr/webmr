@@ -76,7 +76,7 @@ if (require.main === module) {
               size += bs[i].length;
             }
 
-            const bar = new progress(`[:bar] ${name}/${version} :rate bps :percent :etas`, {
+            const bar = new progress(`[:bar] ${name}@${version} :rate bps :percent :etas`, {
               complete: '█',
               incomplete: '.',
               width: 20,
