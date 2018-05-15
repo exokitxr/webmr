@@ -62,7 +62,7 @@ if (require.main === module) {
                   const s = b.toString('utf8');
                   const j = JSON.parse(s);
                   const {username, module, version} = j;
-                  console.log(`+ ${module}@${version} https://files.webmr.io/${module}/${version}/`);
+                  console.log(`+ ${module}@${version} https://${FILES_HOSTNAME}/${module}/${version}/`);
                 });
                 res.on('error', err => {
                   console.warn(err.stack);
