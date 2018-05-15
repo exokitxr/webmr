@@ -66,9 +66,15 @@ if (require.main === module) {
                     const b = Buffer.concat(bs);
                     const s = b.toString('utf8');
                     const j = JSON.parse(s);
-                    const {name, version} = j;
+                    const {name, version, contains} = j;
                     console.log(`+ ${name}@${version}`);
                     console.log(`https://${FILES_HOSTNAME}/${name}/${version}/`);
+                    if (contains.es) {
+                      console.log(`https://${FILES_HOSTNAME}/_builds/${name}/${version}/${name}.mjs`);
+                    }
+                    if (contains.cjs) {
+                      console.log(`https://${FILES_HOSTNAME}/_builds/${name}/${version}/${name}.js`);
+                    }
                   });
                   res.on('error', err => {
                     console.warn(err.stack);
