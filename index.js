@@ -126,14 +126,12 @@ if (require.main === module) {
                           const b = Buffer.concat(bs);
                           const s = b.toString('utf8');
                           const j = JSON.parse(s);
-                          const {name, version, contains} = j;
+                          const {name, version, files} = j;
                           console.log(`+ ${name}@${version}`);
                           console.log(`https://${FILES_HOSTNAME}/${name}/${version}/`);
-                          if (contains.es) {
-                            console.log(`https://${FILES_HOSTNAME}/_builds/${name}/${version}/${name}.mjs`);
-                          }
-                          if (contains.cjs) {
-                            console.log(`https://${FILES_HOSTNAME}/_builds/${name}/${version}/${name}.js`);
+
+                          for (let i = 0; i < files.length; i++) {
+                            console.log(`https://${FILES_HOSTNAME}/${name}/${version}/${files[i].replace(/\.[^\/]+$/, '')}.js`);
                           }
                         });
                         res.on('error', err => {
