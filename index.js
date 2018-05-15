@@ -265,8 +265,7 @@ if (require.main === module) {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                       parseJsonResponse(res, (err, j) => {
                         if (!err) {
-                          const {path: p} = j;
-                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}${p}`);
+                          console.log(j.url);
                         } else {
                           console.warn(err.stack);
                           process.exit(1);
