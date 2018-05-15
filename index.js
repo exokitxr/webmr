@@ -144,6 +144,9 @@ if (require.main === module) {
                       hostname: REGISTRY_HOSTNAME,
                       port: REGISTRY_PORT,
                       path: '/p',
+                      headers: {
+                        'Authorization': `Basic ${Buffer.from(config.email + ':' + config.password, 'utf8').toString('base64')}`,
+                      },
                     }, res => {
                       if (res.statusCode >= 200 && res.statusCode < 300) {
                         const bs = [];
@@ -249,6 +252,9 @@ if (require.main === module) {
                     hostname: REGISTRY_HOSTNAME,
                     port: REGISTRY_PORT,
                     path: path.join('/', 'f', path.basename(fileName)),
+                    headers: {
+                      'Authorization': `Basic ${Buffer.from(config.email + ':' + config.password, 'utf8').toString('base64')}`,
+                    },
                   }, res => {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                       parseJsonResponse(res, (err, j) => {
