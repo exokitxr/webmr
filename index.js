@@ -312,6 +312,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [publish|url] [-u username] [-p password] <directory>');
+    console.warn('usage: webmr [login|logout|publish|url] <file>');
   }
 }
