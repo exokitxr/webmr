@@ -81,6 +81,9 @@ if (require.main === module) {
                 process.exit(1);
               }
             });
+          } else if (res.statusCode === 400) {
+            console.warn(`Invalid request (missing email or password)`);
+            process.exit(1);
           } else if (res.statusCode === 403) {
             console.warn(`Invalid password for ${email}`);
             process.exit(1);
