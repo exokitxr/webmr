@@ -210,38 +210,50 @@ if (require.main === module) {
         .then(config => {
           if (config) {
             const fileName = args._[0];
-            const rs = fs.createReadStream(fileName);
+            fs.lstat(fileName, (err, stats) => {
+              if (!err) {
+                if (stats.isFile()) {
+                  const rs = fs.createReadStream(fileName);
 
-            const req = (REGISTRY_SECURE ? https : http).request({
-              method: 'PUT',
-              hostname: REGISTRY_HOSTNAME,
-              port: REGISTRY_PORT,
-              path: path.join('/', 'f', path.basename(fileName)),
-            }, res => {
-              if (res.statusCode >= 200 && res.statusCode < 300) {
-                parseJsonResponse(res, (err, j) => {
-                  if (!err) {
-                    const {path: p} = j;
-                    console.log(`https://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${p}`);
-                  } else {
-                    console.warn(err.stack);
+                  const req = (REGISTRY_SECURE ? https : http).request({
+                    method: 'PUT',
+                    hostname: REGISTRY_HOSTNAME,
+                    port: REGISTRY_PORT,
+                    path: path.join('/', 'f', path.basename(fileName)),
+                  }, res => {
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                      parseJsonResponse(res, (err, j) => {
+                        if (!err) {
+                          const {path: p} = j;
+                          console.log(`https://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${p}`);
+                        } else {
+                          console.warn(err.stack);
+                          process.exit(1);
+                        }
+                      });
+                    } else {
+                      console.warn(`got invalid status code ${res.statusCode}`);
+                      process.exit(1);
+                    }
+                  });
+
+                  rs.pipe(req);
+                  req.on('error', err => {
+                    if (err.code === 'ENOENT') {
+                      console.warn(`file does not exist: ${JSON.stringiy(fileName)}`);
+                    } else {
+                      console.warn(err.stack);
+                    }
                     process.exit(1);
-                  }
-                });
-              } else {
-                console.warn(`got invalid status code ${res.statusCode}`);
-                process.exit(1);
-              }
-            });
-
-            rs.pipe(req);
-            req.on('error', err => {
-              if (err.code === 'ENOENT') {
-                console.warn(`file does not exist: ${JSON.stringiy(fileName)}`);
+                  });
+                } else {
+                  console.warn(`not a file: ${fileName}`);
+                  process.exit(1);
+                }
               } else {
                 console.warn(err.stack);
+                process.exit(1);
               }
-              process.exit(1);
             });
           } else {
             console.warn('Not logged in; use webmr login');
