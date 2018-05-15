@@ -43,7 +43,7 @@ if (require.main === module) {
             const req = https.request({
               method: 'PUT',
               hostname: 'registry.webmr.io',
-              path: `/p/${username}/${name}`
+              path: `/projects/${name}`
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 const bs = [];
