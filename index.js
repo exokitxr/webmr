@@ -8,6 +8,7 @@ const zlib = require('zlib');
 const minimist = require('minimist');
 const tarFs = require('tar-fs');
 const progress = require('progress');
+const parseJsonResponse = require('parse-json-response');
 
 const HOSTNAME = 'registry.webmr.io';
 
@@ -132,7 +133,15 @@ if (require.main === module) {
         path: path.join('/', 'files', path.basename(fileName)),
       }, res => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('done'); // XXX
+          parseJsonResponse(res, (err, j) => {
+            if (!err) {
+              const {path: p} = j;
+              console.log('https://' + HOSTNAME + '/' + p);
+            } else {
+              console.warn(err.stack);
+              process.exit(1);
+            }
+          });
         } else {
           console.warn(`got invalid status code ${res.statusCode}`);
           process.exit(1);
