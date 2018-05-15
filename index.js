@@ -163,6 +163,12 @@ if (require.main === module) {
                             process.exit(1);
                           }
                         });
+                      } else if (res.statusCode === 401) {
+                        console.warn('Not logged in');
+                        process.exit(1);
+                      } else if (res.statusCode === 403) {
+                        console.warn('Premisson denied');
+                        process.exit(1);
                       } else if (res.statusCode === 409) {
                         console.warn(`cannot overwrite: ${name}@${version} already exists`);
                         process.exit(1);
@@ -263,6 +269,12 @@ if (require.main === module) {
                           process.exit(1);
                         }
                       });
+                    } else if (res.statusCode === 401) {
+                      console.warn('Not logged in');
+                      process.exit(1);
+                    } else if (res.statusCode === 403) {
+                      console.warn('Premisson denied');
+                      process.exit(1);
                     } else {
                       console.warn(`got invalid status code ${res.statusCode}`);
                       process.exit(1);
