@@ -9,6 +9,8 @@ const minimist = require('minimist');
 const tarFs = require('tar-fs');
 const progress = require('progress');
 
+const HOSTNAME = 'registry.webmr.io';
+
 if (require.main === module) {
   const args = minimist(process.argv.slice(2), {
     alias: {
@@ -22,7 +24,10 @@ if (require.main === module) {
       'p',
     ],
   });
-  if (['publish', 'pub', 'p'].includes(args._[0]) && args.username) {
+  let index = -1;
+  if (((index = args._.findIndex(a => a === 'p' || a === 'pub' || a === 'publish')) !== -1) && args.username) {
+    args._.splice(index, 1);
+
     const directoryPath = path.resolve(process.cwd(), args._[1] || '.');
     const packageJsonPath = path.join(directoryPath, 'package.json');
     const {username} = args;
@@ -42,8 +47,8 @@ if (require.main === module) {
           packStream.on('end', () => {
             const req = https.request({
               method: 'PUT',
-              hostname: 'registry.webmr.io',
-              path: `/projects`
+              hostname: HOSTNAME,
+              path: '/projects',
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 const bs = [];
@@ -114,6 +119,39 @@ if (require.main === module) {
         process.exit(1);
       }
     });
+  } else if (((index = args._.findIndex(a => a === 'u' || a === 'url')) !== -1) && args.username) {
+    args._.splice(index, 1);
+
+    if (args._[0].length > 0) {
+      const fileName = args._[0];
+      const rs = fs.createReadStream(fileName);
+
+      const req = https.request({
+        method: 'PUT',
+        hostname: HOSTNAME,
+        path: path.join('/', 'files', path.basename(fileName)),
+      }, res => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('done'); // XXX
+        } else {
+          console.warn(`got invalid status code ${res.statusCode}`);
+          process.exit(1);
+        }
+      });
+
+      rs.pipe(req);
+      req.on('error', err => {
+        if (err.code === 'ENOENT') {
+          console.warn(`file does not exist: ${JSON.stringiy(fileName)}`);
+        } else {
+          console.warn(err.stack);
+        }
+        process.exit(1);
+      });
+    } else {
+      console.warn('missing argument: file name');
+      process.exit(1);
+    }
   } else {
     console.warn('usage: webmr publish [-u username] [-p password] <directory>');
   }
