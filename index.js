@@ -163,6 +163,9 @@ if (require.main === module) {
                             process.exit(1);
                           }
                         });
+                      } else if (res.statusCode === 409) {
+                        console.warn(`cannot overwrite: ${name}@${version} already exists`);
+                        process.exit(1);
                       } else {
                         console.warn(`invalid status code: ${res.statusCode}`);
                         res.pipe(process.stderr);
