@@ -156,10 +156,10 @@ if (require.main === module) {
                           const j = JSON.parse(s);
                           const {name, version, files} = j;
                           console.log(`+ ${name}@${version}`);
-                          console.log(`https://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/`);
+                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/`);
 
                           for (let i = 0; i < files.length; i++) {
-                            console.log(`https://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/${files[i].replace(/\.[^\/]+$/, '')}.js`);
+                            console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/${files[i].replace(/\.[^\/]+$/, '')}.js`);
                           }
                         });
                         res.on('error', err => {
@@ -254,7 +254,7 @@ if (require.main === module) {
                       parseJsonResponse(res, (err, j) => {
                         if (!err) {
                           const {path: p} = j;
-                          console.log(`https://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${p}`);
+                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${p}`);
                         } else {
                           console.warn(err.stack);
                           process.exit(1);
