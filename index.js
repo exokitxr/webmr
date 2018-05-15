@@ -50,7 +50,7 @@ if (require.main === module) {
             const req = https.request({
               method: 'PUT',
               hostname: REGISTRY_HOSTNAME,
-              path: '/projects',
+              path: '/p',
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 const bs = [];
@@ -131,7 +131,7 @@ if (require.main === module) {
       const req = https.request({
         method: 'PUT',
         hostname: REGISTRY_HOSTNAME,
-        path: path.join('/', 'files', path.basename(fileName)),
+        path: path.join('/', 'f', path.basename(fileName)),
       }, res => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           parseJsonResponse(res, (err, j) => {
