@@ -66,16 +66,20 @@ if (require.main === module) {
                     const b = Buffer.concat(bs);
                     const s = b.toString('utf8');
                     const j = JSON.parse(s);
-                    const {username, module, version} = j;
-                    console.log(`+ ${module}@${version} https://${FILES_HOSTNAME}/${module}/${version}/`);
+                    const {name, version} = j;
+                    console.log(`+ ${name}@${version}`);
+                    console.log(`https://${FILES_HOSTNAME}/${name}/${version}/`);
                   });
                   res.on('error', err => {
                     console.warn(err.stack);
                     process.exit(1);
                   });
                 } else {
-                  console.warn('connection error');
-                  process.exit(1);
+                  console.warn(`invalid status code: ${res.statusCode}`);
+                  res.pipe(process.stderr);
+                  res.on('end', () => {
+                    process.exit(1);
+                  });
                 }
               });
               req.on('error', err => {
