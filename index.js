@@ -11,6 +11,7 @@ const progress = require('progress');
 const parseJsonResponse = require('parse-json-response');
 
 const REGISTRY_HOSTNAME = 'registry.webmr.io';
+const REGISTRY_PORT = null;
 const FILES_HOSTNAME = 'files.webmr.io';
 
 if (require.main === module) {
@@ -50,6 +51,7 @@ if (require.main === module) {
             const req = https.request({
               method: 'PUT',
               hostname: REGISTRY_HOSTNAME,
+              port: REGISTRY_PORT,
               path: '/p',
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -131,6 +133,7 @@ if (require.main === module) {
       const req = https.request({
         method: 'PUT',
         hostname: REGISTRY_HOSTNAME,
+        port: REGISTRY_PORT,
         path: path.join('/', 'f', path.basename(fileName)),
       }, res => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
