@@ -149,25 +149,19 @@ if (require.main === module) {
                       },
                     }, res => {
                       if (res.statusCode >= 200 && res.statusCode < 300) {
-                        const bs = [];
-                        res.on('data', d => {
-                          bs.push(d);
-                        });
-                        res.on('end', () => {
-                          const b = Buffer.concat(bs);
-                          const s = b.toString('utf8');
-                          const j = JSON.parse(s);
-                          const {name, version, files} = j;
-                          console.log(`+ ${name}@${version}`);
-                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/`);
+                        parseJsonResponse(res, (err, j) => {
+                          if (!err) {
+                            const {name, version, files} = j;
+                            console.log(`+ ${name}@${version}`);
+                            console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/`);
 
-                          for (let i = 0; i < files.length; i++) {
-                            console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/${files[i].replace(/\.[^\/]+$/, '')}.js`);
+                            for (let i = 0; i < files.length; i++) {
+                              console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/${files[i].replace(/\.[^\/]+$/, '')}.js`);
+                            }
+                          } else {
+                            console.warn(err.stack);
+                            process.exit(1);
                           }
-                        });
-                        res.on('error', err => {
-                          console.warn(err.stack);
-                          process.exit(1);
                         });
                       } else {
                         console.warn(`invalid status code: ${res.statusCode}`);
