@@ -266,7 +266,7 @@ if (require.main === module) {
                       parseJsonResponse(res, (err, j) => {
                         if (!err) {
                           const {path: p} = j;
-                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${p}`);
+                          console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}${p}`);
                         } else {
                           console.warn(err.stack);
                           process.exit(1);
