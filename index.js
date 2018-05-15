@@ -10,7 +10,8 @@ const tarFs = require('tar-fs');
 const progress = require('progress');
 const parseJsonResponse = require('parse-json-response');
 
-const HOSTNAME = 'registry.webmr.io';
+const REGISTRY_HOSTNAME = 'registry.webmr.io';
+const FILES_HOSTNAME = 'files.webmr.io';
 
 if (require.main === module) {
   const args = minimist(process.argv.slice(2), {
@@ -48,7 +49,7 @@ if (require.main === module) {
           packStream.on('end', () => {
             const req = https.request({
               method: 'PUT',
-              hostname: HOSTNAME,
+              hostname: REGISTRY_HOSTNAME,
               path: '/projects',
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -129,14 +130,14 @@ if (require.main === module) {
 
       const req = https.request({
         method: 'PUT',
-        hostname: HOSTNAME,
+        hostname: REGISTRY_HOSTNAME,
         path: path.join('/', 'files', path.basename(fileName)),
       }, res => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           parseJsonResponse(res, (err, j) => {
             if (!err) {
               const {path: p} = j;
-              console.log('https://' + HOSTNAME + '/' + p);
+              console.log('https://' + FILES_HOSTNAME + '/' + p);
             } else {
               console.warn(err.stack);
               process.exit(1);
