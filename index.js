@@ -170,7 +170,7 @@ if (require.main === module) {
                         console.warn('Not logged in');
                         process.exit(1);
                       } else if (res.statusCode === 403) {
-                        console.warn('Premisson denied');
+                        console.warn(`Permisson denied for ${name}`);
                         process.exit(1);
                       } else if (res.statusCode === 409) {
                         console.warn(`cannot overwrite: ${name}@${version} already exists`);
