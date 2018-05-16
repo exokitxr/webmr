@@ -275,7 +275,10 @@ if (require.main === module) {
                       process.exit(1);
                     } else {
                       console.warn(`got invalid status code ${res.statusCode}`);
-                      process.exit(1);
+                      res.pipe(process.stderr);
+                      res.on('end', () => {
+                        process.exit(1);
+                      });
                     }
                   });
 
