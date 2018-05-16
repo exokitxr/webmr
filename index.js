@@ -18,12 +18,19 @@ const REGISTRY_PORT = null;
 const REGISTRY_SECURE = true;
 
 if (require.main === module) {
+  const _jsonParse = s => {
+    try {
+      return JSON.parse(s);
+    } catch (err) {
+      return null;
+    }
+  };
+
   const configFilePath = path.join(os.homedir(), '.webmr-cli');
   const _requestConfig = () => new Promise((accept, reject) => {
     fs.readFile(configFilePath, 'utf8', (err, s) => {
       if (!err) {
-        const j = JSON.parse(s);
-        accept(j);
+        accept(_jsonParse(s));
       } else if (err.code === 'ENOENT') {
         accept(null);
       } else {
@@ -127,6 +134,19 @@ if (require.main === module) {
         process.exit(1);
       }
     });
+  } else if ((index = args._.findIndex(a => a === 'w' || a === 'whoami')) !== -1) {
+    _requestConfig()
+      .then(config => {
+        if (config && config.email) {
+          console.log('Logged in as', config.email);
+        } else {
+          console.log('Not logged in');
+        }
+      })
+      .catch(err => {
+        console.warn(err.stack);
+        process.exit(1);
+      });
   } else if ((index = args._.findIndex(a => a === 'p' || a === 'pub' || a === 'publish')) !== -1) {
     args._.splice(index, 1);
 
@@ -319,6 +339,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|publish|url] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|url] <file>');
   }
 }
