@@ -403,7 +403,7 @@ if (require.main === module) {
                     _recurse();
                   });
                 } else {
-                  console.warn(`not a file: ${fileName}`);
+                  console.warn(`not a file or directory: ${fileName}`);
                   process.exit(1);
                 }
               } else {
