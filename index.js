@@ -272,7 +272,8 @@ if (require.main === module) {
       _requestConfig()
         .then(config => {
           if (config) {
-            const fileName = args._[0];
+            const fileName = path.resolve(process.cwd(), args._[0]);
+
             fs.lstat(fileName, (err, stats) => {
               if (!err) {
                 if (stats.isFile()) {
