@@ -70,12 +70,21 @@ if (require.main === module) {
           },
         }, res => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            fs.writeFile(configFilePath, JSON.stringify({
-              email,
-              password,
-            }), err => {
+            parseJsonResponse(res, (err, j) => {
               if (!err) {
-                console.log('Logged in as', email);
+                const {token} = j;
+
+                fs.writeFile(configFilePath, JSON.stringify({
+                  email,
+                  token,
+                }), err => {
+                  if (!err) {
+                    console.log('Logged in as', email);
+                  } else {
+                    console.warn(err.stack);
+                    process.exit(1);
+                  }
+                });
               } else {
                 console.warn(err.stack);
                 process.exit(1);
@@ -148,13 +157,13 @@ if (require.main === module) {
                       port: REGISTRY_PORT,
                       path: '/p',
                       headers: {
-                        'Authorization': `Basic ${Buffer.from(config.email + ':' + config.password, 'utf8').toString('base64')}`,
+                        'Authorization': `Token ${config.email} ${config.token}`,
                       },
                     }, res => {
                       if (res.statusCode >= 200 && res.statusCode < 300) {
                         parseJsonResponse(res, (err, j) => {
                           if (!err) {
-                            const {name, version, files} = j;
+                            const {name, version} = j;
                             console.log(`+ ${name}@${version}`);
                             console.log(`http${REGISTRY_SECURE ? 's' : ''}://${REGISTRY_HOSTNAME}${REGISTRY_PORT ? (':' + REGISTRY_PORT) :''}/${name}/${version}/`);
                           } else {
@@ -255,7 +264,7 @@ if (require.main === module) {
                     port: REGISTRY_PORT,
                     path: path.join('/', 'f', path.basename(fileName)),
                     headers: {
-                      'Authorization': `Basic ${Buffer.from(config.email + ':' + config.password, 'utf8').toString('base64')}`,
+                      'Authorization': `Token ${config.email} ${config.token}`,
                     },
                   }, res => {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
