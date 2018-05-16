@@ -271,7 +271,7 @@ if (require.main === module) {
                       console.warn('Not logged in');
                       process.exit(1);
                     } else if (res.statusCode === 403) {
-                      console.warn('Premisson denied');
+                      console.warn('Permisson denied');
                       process.exit(1);
                     } else {
                       console.warn(`got invalid status code ${res.statusCode}`);
