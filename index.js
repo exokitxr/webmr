@@ -321,6 +321,87 @@ if (require.main === module) {
                     }
                     process.exit(1);
                   });
+                } else if (stats.isDirectory()) {
+                  const directoryPath = path.resolve(process.cwd(), args._[0] || '.');
+
+                  const bs = [];
+                  const packStream = tarFs.pack(directoryPath).pipe(zlib.createGzip());
+                  packStream.on('data', d => {
+                    bs.push(d);
+                  });
+                  packStream.on('end', () => {
+                    const req = (REGISTRY_SECURE ? https : http).request({
+                      method: 'PUT',
+                      hostname: REGISTRY_HOSTNAME,
+                      port: REGISTRY_PORT,
+                      path: '/d/' + path.basename(directoryPath),
+                      headers: {
+                        'Authorization': `Token ${config.email} ${config.token}`,
+                      },
+                    }, res => {
+                      if (res.statusCode >= 200 && res.statusCode < 300) {
+                        parseJsonResponse(res, (err, j) => {
+                          if (!err) {
+                            console.log(j.url);
+                          } else {
+                            console.warn(err.stack);
+                            process.exit(1);
+                          }
+                        });
+                      } else if (res.statusCode === 401) {
+                        console.warn('Not logged in');
+                        process.exit(1);
+                      } else if (res.statusCode === 403) {
+                        console.warn(`Permisson denied for ${name}`);
+                        process.exit(1);
+                      } else if (res.statusCode === 409) {
+                        console.warn(`cannot overwrite: ${name}@${version} already exists`);
+                        process.exit(1);
+                      } else {
+                        console.warn(`invalid status code: ${res.statusCode}`);
+                        res.pipe(process.stderr);
+                        res.on('end', () => {
+                          process.exit(1);
+                        });
+                      }
+                    });
+                    req.on('error', err => {
+                      console.warn(err.stack);
+                      process.exit(1);
+                    });
+
+                    let size = 0;
+                    for (let i = 0; i < bs.length; i++) {
+                      size += bs[i].length;
+                    }
+
+                    const bar = new progress(`[:bar] ${directoryPath} :rate bps :percent :etas`, {
+                      complete: '█',
+                      incomplete: '.',
+                      width: 20,
+                      total: size,
+                    });
+
+                    let i = 0;
+                    const _recurse = () => {
+                      for (;;) {
+                        if (i < bs.length) {
+                          const b = bs[i++];
+                          const more = req.write(b);
+                          bar.tick(b.length);
+                          if (more) {
+                            continue;
+                          } else {
+                            req.once('drain', _recurse);
+                          }
+                        } else {
+                          req.end();
+                          break;
+                        }
+                      }
+                    };
+                    _recurse();
+                  });
                 } else {
                   console.warn(`not a file: ${fileName}`);
                   process.exit(1);
