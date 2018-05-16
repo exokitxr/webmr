@@ -262,7 +262,7 @@ if (require.main === module) {
                     method: 'PUT',
                     hostname: REGISTRY_HOSTNAME,
                     port: REGISTRY_PORT,
-                    path: path.join('/', 'f', path.basename(fileName)),
+                    path: '/f/' + path.basename(fileName),
                     headers: {
                       'Authorization': `Token ${config.email} ${config.token}`,
                     },
