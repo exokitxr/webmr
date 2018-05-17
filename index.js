@@ -538,6 +538,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|whoami|publish|url|server [ls]] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|url|server [ls|add|rm]] <file>');
   }
 }
