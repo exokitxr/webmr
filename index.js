@@ -263,6 +263,72 @@ if (require.main === module) {
       console.warn('missing argument: directory name');
       process.exit(1);
     }
+  } else if ((index = args._.findIndex(a => a === 'unpub' || a === 'unpublish')) !== -1) {
+    args._.splice(index, 1);
+
+    if (args._.length > 0) {
+      const match = args._[0].match(/^(.+)?@([0-9]+\.[0-9]+\.[0-9]+)$/);
+
+      if (match) {
+        const name = match[1];
+        const version = match[2];
+
+        _requestConfig()
+          .then(config => {
+            if (config) {
+              const req = (REGISTRY_SECURE ? https : http).request({
+                method: 'DELETE',
+                hostname: REGISTRY_HOSTNAME,
+                port: REGISTRY_PORT,
+                path: '/p/' + name + '/' + version,
+                headers: {
+                  'Authorization': `Token ${config.email} ${config.token}`,
+                },
+              }, res => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  parseJsonResponse(res, (err, j) => {
+                    if (!err) {
+                      console.log(`- ${name}@${version}`);
+                    } else {
+                      console.warn(err.stack);
+                      process.exit(1);
+                    }
+                  });
+                } else if (res.statusCode === 401) {
+                  console.warn('Not logged in');
+                  process.exit(1);
+                } else if (res.statusCode === 403) {
+                  console.warn(`Permisson denied for ${name}`);
+                  process.exit(1);
+                } else if (res.statusCode === 404) {
+                  console.warn(`Cannot delete: ${name}@${version} does not exist`);
+                  process.exit(1);
+                } else {
+                  console.warn(`invalid status code: ${res.statusCode}`);
+                  res.pipe(process.stderr);
+                  res.on('end', () => {
+                    process.exit(1);
+                  });
+                }
+              });
+              req.on('error', err => {
+                console.warn(err.stack);
+                process.exit(1);
+              });
+              req.end();
+            } else {
+              console.warn('Use `webmr login` to log in');
+              process.exit(1);
+            }
+          });
+      } else {
+        console.warn('Invalid module specification');
+        process.exit(1);
+      }
+    } else {
+      console.warn('missing argument: directory name');
+      process.exit(1);
+    }
   } else if ((index = args._.findIndex(a => a === 'u' || a === 'url')) !== -1) {
     args._.splice(index, 1);
 
