@@ -54,8 +54,6 @@ if (require.main === module) {
       {
         name: 'email',
         message: 'Email',
-        // warning: 'Invalid email',
-        // validator: /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
         empty: false,
       },
       {
@@ -421,6 +419,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|whoami|publish|url] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|url|server [ls]] <file>');
   }
 }
