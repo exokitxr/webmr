@@ -536,7 +536,120 @@ if (require.main === module) {
       console.warn('missing argument: key');
       process.exit(1);
     }
-  } else if ((index = args._.findIndex(a => a === 's' || a === 'server')) !== -1) {
+  } else if ((index = args._.findIndex(a => a === 'g' || a === 'get')) !== -1) {
+    args._.splice(index, 1);
+
+    if (args._.length > 0) {
+      const key = args._[0];
+
+      _requestConfig()
+        .then(config => {
+          if (config && config.email) {
+            const req = (REGISTRY_SECURE ? https : http).request({
+              method: 'GET',
+              hostname: REGISTRY_HOSTNAME,
+              port: REGISTRY_PORT,
+              path: '/u/' + config.email + '/' + key,
+            }, res => {
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                res.pipe(process.stdout);
+              } else if (res.statusCode === 404) {
+                console.warn(`Key not found: '${key}'`);
+                process.exit(1);
+              } else {
+                console.warn(`invalid status code: ${res.statusCode}`);
+                res.pipe(process.stderr);
+                res.on('end', () => {
+                  process.exit(1);
+                });
+              }
+            });
+            req.on('error', err => {
+              console.warn(err.stack);
+              process.exit(1);
+            });
+            req.end();
+          } else {
+            console.log('Not logged in');
+          }
+        })
+        .catch(err => {
+          console.warn(err.stack);
+          process.exit(1);
+        });
+    } else {
+      console.warn('missing argument: key');
+      process.exit(1);
+    }
+  } else if ((index = args._.findIndex(a => a === 's' || a === 'set')) !== -1) {
+    args._.splice(index, 1);
+
+    if (args._.length > 0) {
+      const key = args._[0];
+      args._.splice(index, 1);
+      const value = (args._.length > 0 && args._[0]) || '-';
+
+      const _doSet = (k, bs) => {
+        _requestConfig()
+          .then(config => {
+            if (config && config.email) {
+              const req = (REGISTRY_SECURE ? https : http).request({
+                method: 'PUT',
+                hostname: REGISTRY_HOSTNAME,
+                port: REGISTRY_PORT,
+                path: '/u/' + config.email + '/' + key,
+                headers: {
+                  'Authorization': `Token ${config.email} ${config.token}`,
+                  'Content-Type': 'application/octet-stream',
+                },
+              }, res => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  // nothing
+                } else if (res.statusCode === 404) {
+                  console.warn(`Key not found: '${key}'`);
+                  process.exit(1);
+                } else {
+                  console.warn(`invalid status code: ${res.statusCode}`);
+                  res.pipe(process.stderr);
+                  res.on('end', () => {
+                    process.exit(1);
+                  });
+                }
+              });
+              req.on('error', err => {
+                console.warn(err.stack);
+                process.exit(1);
+              });
+              for (let i = 0; i < bs.length; i++) {
+                req.write(bs[i]);
+              }
+              req.end();
+            } else {
+              console.log('Not logged in');
+            }
+          })
+          .catch(err => {
+            console.warn(err.stack);
+            process.exit(1);
+          });
+      };
+
+      if (value === '-') {
+        const bs = [];
+        process.stdin.on('data', b => {
+          bs.push(b);
+        });
+        process.stdin.on('end', () => {
+          _doSet(key, bs);
+        });
+      } else {
+        _doSet(key, [value]);
+      }
+    } else {
+      console.warn('missing argument: key');
+      process.exit(1);
+    }
+  } else if ((index = args._.findIndex(a => a === 'server')) !== -1) {
     args._.splice(index, 1);
 
     if ((index = args._.findIndex(a => a === 'ls')) !== -1) {
@@ -656,6 +769,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|remove|server [ls|add|rm]] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|remove|get|set|server [ls|add|rm]] <file>');
   }
 }
