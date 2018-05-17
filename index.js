@@ -333,21 +333,24 @@ if (require.main === module) {
     args._.splice(index, 1);
 
     if (args._.length > 0) {
+      const fileName = args._.shift();
+      const name = args._.length > 0 ? args._.shift() : null;
+
       _requestConfig()
         .then(config => {
           if (config) {
-            const fileName = path.resolve(process.cwd(), args._[0]);
+            const fileNameFull = path.resolve(process.cwd(), fileName);
 
-            fs.lstat(fileName, (err, stats) => {
+            fs.lstat(fileNameFull, (err, stats) => {
               if (!err) {
                 if (stats.isFile()) {
-                  const rs = fs.createReadStream(fileName);
+                  const rs = fs.createReadStream(fileNameFull);
 
                   const req = (REGISTRY_SECURE ? https : http).request({
                     method: 'PUT',
                     hostname: REGISTRY_HOSTNAME,
                     port: REGISTRY_PORT,
-                    path: '/f/' + path.basename(fileName),
+                    path: '/f/' + path.basename(fileNameFull) + (name !== null ? ('/' + name) : ''),
                     headers: {
                       'Authorization': `Token ${config.email} ${config.token}`,
                     },
@@ -398,7 +401,7 @@ if (require.main === module) {
                       method: 'PUT',
                       hostname: REGISTRY_HOSTNAME,
                       port: REGISTRY_PORT,
-                      path: '/d/' + path.basename(directoryPath),
+                      path: '/d/' + path.basename(directoryPath) + (name !== null ? ('/' + name) : ''),
                       headers: {
                         'Authorization': `Token ${config.email} ${config.token}`,
                       },
