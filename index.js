@@ -418,6 +418,125 @@ if (require.main === module) {
       console.warn('missing argument: file name');
       process.exit(1);
     }
+  } else if ((index = args._.findIndex(a => a === 's' || a === 'server')) !== -1) {
+    args._.splice(index, 1);
+
+    if ((index = args._.findIndex(a => a === 'ls')) !== -1) {
+      args._.splice(index, 1);
+
+      const req = (REGISTRY_SECURE ? https : http).request({
+        method: 'GET',
+        hostname: REGISTRY_HOSTNAME,
+        port: REGISTRY_PORT,
+        path: '/s',
+      }, res => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          parseJsonResponse(res, (err, j) => {
+            if (!err) {
+              const {servers} = j;
+              if (servers.length > 0) {
+                console.log(servers.map(server => JSON.stringify(server.name)).join('\n'));
+              } else {
+                console.log('No servers');
+              }
+            } else {
+              console.warn(err.stack);
+              process.exit(1);
+            }
+          });
+        } else {
+          console.warn(`invalid status code: ${res.statusCode}`);
+          res.pipe(process.stderr);
+          res.on('end', () => {
+            process.exit(1);
+          });
+        }
+      });
+      req.on('error', err => {
+        console.warn(err.stack);
+        process.exit(1);
+      });
+      req.end();
+    } else if ((index = args._.findIndex(a => a === 'add')) !== -1) {
+      args._.splice(index, 1);
+
+      if (args._.length > 0) {
+        const name = args._[0];
+
+        const req = (REGISTRY_SECURE ? https : http).request({
+          method: 'POST',
+          hostname: REGISTRY_HOSTNAME,
+          port: REGISTRY_PORT,
+          path: '/s/' + name,
+        }, res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            parseJsonResponse(res, (err, j) => {
+              if (!err) {
+                console.log(j);
+              } else {
+                console.warn(err.stack);
+                process.exit(1);
+              }
+            });
+          } else {
+            console.warn(`invalid status code: ${res.statusCode}`);
+            res.pipe(process.stderr);
+            res.on('end', () => {
+              process.exit(1);
+            });
+          }
+        });
+        req.on('error', err => {
+          console.warn(err.stack);
+          process.exit(1);
+        });
+        req.end();
+      } else {
+        console.warn('Missing server name');
+        process.exit(1);
+      }
+    } else if ((index = args._.findIndex(a => a === 'rm')) !== -1) {
+      args._.splice(index, 1);
+
+      if (args._.length > 0) {
+        const name = args._[0];
+
+        const req = (REGISTRY_SECURE ? https : http).request({
+          method: 'DELETE',
+          hostname: REGISTRY_HOSTNAME,
+          port: REGISTRY_PORT,
+          path: '/s/' + name,
+        }, res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            parseJsonResponse(res, (err, j) => {
+              if (!err) {
+                console.log(j);
+              } else {
+                console.warn(err.stack);
+                process.exit(1);
+              }
+            });
+          } else {
+            console.warn(`invalid status code: ${res.statusCode}`);
+            res.pipe(process.stderr);
+            res.on('end', () => {
+              process.exit(1);
+            });
+          }
+        });
+        req.on('error', err => {
+          console.warn(err.stack);
+          process.exit(1);
+        });
+        req.end();
+      } else {
+        console.warn('Missing server name');
+        process.exit(1);
+      }
+    } else {
+      console.warn('invalid command');
+      process.exit(1);
+    }
   } else {
     console.warn('usage: webmr [login|logout|whoami|publish|url|server [ls]] <file>');
   }
