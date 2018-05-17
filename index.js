@@ -484,6 +484,55 @@ if (require.main === module) {
       console.warn('missing argument: file name');
       process.exit(1);
     }
+  } else if ((index = args._.findIndex(a => a === 'rm' || a === 'remove')) !== -1) {
+    args._.splice(index, 1);
+
+    if (args._.length > 0) {
+      const name = args._[0];
+
+      _requestConfig()
+        .then(config => {
+          if (config && config.email) {
+            const req = (REGISTRY_SECURE ? https : http).request({
+              method: 'DELETE',
+              hostname: REGISTRY_HOSTNAME,
+              port: REGISTRY_PORT,
+              path: '/f/' + name,
+              headers: {
+                'Authorization': `Token ${config.email} ${config.token}`,
+              },
+            }, res => {
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                // nothing
+              } else if (res.statusCode === 404) {
+                console.warn(`Cannot remove: '${name}' does not exist`);
+                process.exit(1);
+              } else {
+                console.warn(`invalid status code: ${res.statusCode}`);
+                res.pipe(process.stderr);
+                res.on('end', () => {
+                  process.exit(1);
+                });
+              }
+            });
+            req.on('error', err => {
+              console.warn(err.stack);
+              process.exit(1);
+            });
+            req.end();
+          } else {
+            console.warn('Use `webmr login` to log in');
+            process.exit(1);
+          }
+        })
+        .catch(err => {
+          console.warn(err.stack);
+          process.exit(1);
+        });
+    } else {
+      console.warn('missing argument: key');
+      process.exit(1);
+    }
   } else if ((index = args._.findIndex(a => a === 's' || a === 'server')) !== -1) {
     args._.splice(index, 1);
 
@@ -604,6 +653,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|server [ls|add|rm]] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|remove|server [ls|add|rm]] <file>');
   }
 }
