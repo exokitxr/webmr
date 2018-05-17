@@ -353,7 +353,7 @@ if (require.main === module) {
                         console.warn(`Permisson denied for ${name}`);
                         process.exit(1);
                       } else if (res.statusCode === 409) {
-                        console.warn(`cannot overwrite: ${name}@${version} already exists`);
+                        console.warn(`Cannot overwrite: ${name}@${version} already exists`);
                         process.exit(1);
                       } else {
                         console.warn(`invalid status code: ${res.statusCode}`);
