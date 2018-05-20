@@ -64,7 +64,7 @@ if (require.main === module) {
       },
     ], (err, result) => {
       if (result) {
-        const {email, password} = result;
+        const {email: username, password} = result;
         const req = (REGISTRY_SECURE ? https : http).request({
           method: 'POST',
           hostname: REGISTRY_HOSTNAME,
@@ -80,11 +80,11 @@ if (require.main === module) {
                 const {token} = j;
 
                 fs.writeFile(configFilePath, JSON.stringify({
-                  email,
+                  username,
                   token,
                 }), err => {
                   if (!err) {
-                    console.log('Logged in as', email);
+                    console.log('Logged in as', username);
                   } else {
                     console.warn(err.stack);
                     process.exit(1);
@@ -99,7 +99,7 @@ if (require.main === module) {
             console.warn(`Invalid request (missing email or password)`);
             process.exit(1);
           } else if (res.statusCode === 403) {
-            console.warn(`Invalid password for ${email}`);
+            console.warn(`Invalid password for ${username}`);
             process.exit(1);
           } else {
             console.warn(`invalid status code: ${res.statusCode}`);
@@ -114,7 +114,7 @@ if (require.main === module) {
           process.exit(1);
         });
         req.end(JSON.stringify({
-          email,
+          username,
           password,
         }));
       } else {
@@ -135,8 +135,8 @@ if (require.main === module) {
   } else if ((index = args._.findIndex(a => a === 'w' || a === 'whoami')) !== -1) {
     _requestConfig()
       .then(config => {
-        if (config && config.email) {
-          console.log('Logged in as', config.email);
+        if (config && config.username) {
+          console.log('Logged in as', config.username);
         } else {
           console.log('Not logged in');
         }
@@ -175,7 +175,7 @@ if (require.main === module) {
                       port: REGISTRY_PORT,
                       path: '/p',
                       headers: {
-                        'Authorization': `Token ${config.email} ${config.token}`,
+                        'Authorization': `Token ${config.username} ${config.token}`,
                       },
                     }, res => {
                       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -282,7 +282,7 @@ if (require.main === module) {
                 port: REGISTRY_PORT,
                 path: '/p/' + name + '/' + version,
                 headers: {
-                  'Authorization': `Token ${config.email} ${config.token}`,
+                  'Authorization': `Token ${config.username} ${config.token}`,
                 },
               }, res => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -352,7 +352,7 @@ if (require.main === module) {
                     port: REGISTRY_PORT,
                     path: '/f/' + path.basename(fileNameFull) + (name !== null ? ('/' + name) : ''),
                     headers: {
-                      'Authorization': `Token ${config.email} ${config.token}`,
+                      'Authorization': `Token ${config.username} ${config.token}`,
                     },
                   }, res => {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -403,7 +403,7 @@ if (require.main === module) {
                       port: REGISTRY_PORT,
                       path: '/d/' + path.basename(directoryPath) + (name !== null ? ('/' + name) : ''),
                       headers: {
-                        'Authorization': `Token ${config.email} ${config.token}`,
+                        'Authorization': `Token ${config.username} ${config.token}`,
                       },
                     }, res => {
                       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -495,14 +495,14 @@ if (require.main === module) {
 
       _requestConfig()
         .then(config => {
-          if (config && config.email) {
+          if (config && config.username) {
             const req = (REGISTRY_SECURE ? https : http).request({
               method: 'DELETE',
               hostname: REGISTRY_HOSTNAME,
               port: REGISTRY_PORT,
               path: '/f/' + name,
               headers: {
-                'Authorization': `Token ${config.email} ${config.token}`,
+                'Authorization': `Token ${config.username} ${config.token}`,
               },
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -544,12 +544,12 @@ if (require.main === module) {
 
       _requestConfig()
         .then(config => {
-          if (config && config.email) {
+          if (config && config.username) {
             const req = (REGISTRY_SECURE ? https : http).request({
               method: 'GET',
               hostname: REGISTRY_HOSTNAME,
               port: REGISTRY_PORT,
-              path: '/u/' + config.email + '/' + key,
+              path: '/u/' + config.username + '/' + key,
             }, res => {
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 res.pipe(process.stdout);
@@ -592,14 +592,14 @@ if (require.main === module) {
       const _doSet = (k, bs) => {
         _requestConfig()
           .then(config => {
-            if (config && config.email) {
+            if (config && config.username) {
               const req = (REGISTRY_SECURE ? https : http).request({
                 method: 'PUT',
                 hostname: REGISTRY_HOSTNAME,
                 port: REGISTRY_PORT,
-                path: '/u/' + config.email + '/' + key,
+                path: '/u/' + config.username + '/' + key,
                 headers: {
-                  'Authorization': `Token ${config.email} ${config.token}`,
+                  'Authorization': `Token ${config.username} ${config.token}`,
                   'Content-Type': 'application/octet-stream',
                 },
               }, res => {
