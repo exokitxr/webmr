@@ -389,10 +389,8 @@ if (require.main === module) {
                     process.exit(1);
                   });
                 } else if (stats.isDirectory()) {
-                  const directoryPath = path.resolve(process.cwd(), args._[0] || '.');
-
                   const bs = [];
-                  const packStream = tarFs.pack(directoryPath).pipe(zlib.createGzip());
+                  const packStream = tarFs.pack(fileNameFull).pipe(zlib.createGzip());
                   packStream.on('data', d => {
                     bs.push(d);
                   });
@@ -401,7 +399,7 @@ if (require.main === module) {
                       method: 'PUT',
                       hostname: REGISTRY_HOSTNAME,
                       port: REGISTRY_PORT,
-                      path: '/d/' + path.basename(directoryPath) + (name !== null ? ('/' + name) : ''),
+                      path: '/d/' + path.basename(fileNameFull) + (name !== null ? ('/' + name) : ''),
                       headers: {
                         'Authorization': `Token ${config.username} ${config.token}`,
                       },
@@ -442,7 +440,7 @@ if (require.main === module) {
                       size += bs[i].length;
                     }
 
-                    const bar = new progress(`[:bar] ${directoryPath} :rate bps :percent :etas`, {
+                    const bar = new progress(`[:bar] ${fileNameFull} :rate bps :percent :etas`, {
                       complete: '█',
                       incomplete: '.',
                       width: 20,
