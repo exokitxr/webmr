@@ -534,6 +534,44 @@ if (require.main === module) {
       console.warn('missing argument: key');
       process.exit(1);
     }
+  } else if ((index = args._.findIndex(a => a === 'ls')) !== -1) {
+    args._.splice(index, 1);
+
+    _requestConfig()
+      .then(config => {
+        if (config && config.username) {
+          const req = (REGISTRY_SECURE ? https : http).request({
+            method: 'GET',
+            hostname: REGISTRY_HOSTNAME,
+            port: REGISTRY_PORT,
+            path: '/f',
+            headers: {
+              'Authorization': `Token ${config.username} ${config.token}`,
+            },
+          }, res => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              res.pipe(process.stdout);
+            } else {
+              console.warn(`invalid status code: ${res.statusCode}`);
+              res.pipe(process.stderr);
+              res.on('end', () => {
+                process.exit(1);
+              });
+            }
+          });
+          req.on('error', err => {
+            console.warn(err.stack);
+            process.exit(1);
+          });
+          req.end();
+        } else {
+          console.log('Not logged in');
+        }
+      })
+      .catch(err => {
+        console.warn(err.stack);
+        process.exit(1);
+      });
   } else if ((index = args._.findIndex(a => a === 'g' || a === 'get')) !== -1) {
     args._.splice(index, 1);
 
@@ -767,6 +805,6 @@ if (require.main === module) {
       process.exit(1);
     }
   } else {
-    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|remove|get|set|server [ls|add|rm]] <file>');
+    console.warn('usage: webmr [login|logout|whoami|publish|unpublish|url|ls|remove|get|set|server [ls|add|rm]] <file>');
   }
 }
